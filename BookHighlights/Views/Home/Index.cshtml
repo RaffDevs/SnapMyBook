@@ -1,0 +1,77 @@
+@{
+    ViewData["Title"] = "Início";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="hero min-h-[60vh]" style="background-image: url(https://img.freepik.com/free-photo/books-library_1098-17632.jpg);">
+    <div class="hero-overlay bg-opacity-60"></div>
+    <div class="hero-content text-center text-neutral-content">
+        <div class="max-w-md">
+            <h1 class="mb-5 text-5xl font-bold">SnapMyBook</h1>
+            <p class="mb-5 text-lg">Capture e guarde seus trechos favoritos de livros físicos com OCR automático.</p>
+            <div class="flex flex-col gap-4">
+                <a asp-controller="Books" asp-action="Create" class="btn btn-primary btn-lg">Novo Livro</a>
+                <a asp-controller="Books" asp-action="Index" class="btn btn-outline btn-lg">Meus Livros</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Three.js Background Animation -->
+<div id="three-container" class="fixed inset-0 -z-10"></div>
+
+@section Scripts {
+<script>
+    // Three.js animation for book pages floating
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById('three-container').appendChild(renderer.domElement);
+    
+    // Create floating particles (representing words/ideas)
+    const particles = [];
+    const particleCount = 100;
+    
+    const geometry = new THREE.SphereGeometry(0.05, 8, 8);
+    const material = new THREE.MeshBasicMaterial({ color: 0x60a5fa, transparent: true, opacity: 0.6 });
+    
+    for (let i = 0; i < particleCount; i++) {
+        const particle = new THREE.Mesh(geometry, material);
+        particle.position.x = (Math.random() - 0.5) * 10;
+        particle.position.y = (Math.random() - 0.5) * 10;
+        particle.position.z = (Math.random() - 0.5) * 5 - 2;
+        particle.velocity = {
+            x: (Math.random() - 0.5) * 0.02,
+            y: (Math.random() - 0.5) * 0.02
+        };
+        particles.push(particle);
+        scene.add(particle);
+    }
+    
+    camera.position.z = 5;
+    
+    function animate() {
+        requestAnimationFrame(animate);
+        
+        particles.forEach(particle => {
+            particle.position.x += particle.velocity.x;
+            particle.position.y += particle.velocity.y;
+            
+            if (particle.position.x > 5 || particle.position.x < -5) particle.velocity.x *= -1;
+            if (particle.position.y > 5 || particle.position.y < -5) particle.velocity.y *= -1;
+        });
+        
+        renderer.render(scene, camera);
+    }
+    
+    animate();
+    
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+</script>
+}
