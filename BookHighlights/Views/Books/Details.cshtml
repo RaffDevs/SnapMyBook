@@ -1,0 +1,139 @@
+@model BookHighlights.Models.Book
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var highlights = ViewBag.Highlights as IEnumerable<BookHighlights.Models.Highlight>;
+}
+
+<div class="mb-6">
+    <a asp-action="Index" class="btn btn-ghost btn-sm mb-2">← Voltar para livros</a>
+    <h1 class="text-3xl font-bold">@Model.Title</h1>
+    @if (!string.IsNullOrEmpty(Model.Author))
+    {
+        <p class="text-lg opacity-70">✍️ @Model.Author</p>
+    }
+</div>
+
+<div class="flex gap-3 mb-6">
+    <a asp-action="Capture" asp-route-id="@Model.Id" class="btn btn-primary flex-1">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+        </svg>
+        Capturar Novo Destaque
+    </a>
+</div>
+
+@if (highlights == null || !highlights.Any())
+{
+    <div class="text-center py-12 bg-base-100 rounded-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-24 h-24 mx-auto text-base-content opacity-30">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+        </svg>
+        <p class="mt-4 text-lg text-base-content opacity-60">Nenhum destaque capturado ainda.</p>
+        <p class="text-sm opacity-50">Use o botão acima para capturar um trecho do livro com sua câmera.</p>
+    </div>
+}
+else
+{
+    <div class="space-y-4">
+        <h2 class="text-xl font-semibold mb-4">📝 Destaques (@highlights.Count())</h2>
+        @foreach (var highlight in highlights)
+        {
+            <div class="card bg-base-100 shadow-md">
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(highlight.ImagePath))
+                    {
+                        <figure class="mb-2">
+                            <img src="@highlight.ImagePath" alt="Trecho capturado" class="rounded-lg max-h-48 object-contain" />
+                        </figure>
+                    }
+                    <blockquote class="border-l-4 border-primary pl-4 italic my-2">
+                        <p class="text-base">@highlight.Text</p>
+                    </blockquote>
+                    <div class="flex justify-between items-center text-sm opacity-60">
+                        <span>📄 Página @highlight.PageNumber</span>
+                        <span>@highlight.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+<script>
+    // Three.js animation - floating quotes
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    let container = document.getElementById('three-bg');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'three-bg';
+        container.className = 'fixed inset-0 -z-10 pointer-events-none';
+        document.body.appendChild(container);
+    }
+    container.appendChild(renderer.domElement);
+    
+    const particles = [];
+    const particleCount = 30;
+    
+    // Create quote mark shapes
+    const shape = new THREE.Shape();
+    shape.moveTo(0, 0);
+    shape.lineTo(0.3, 0);
+    shape.lineTo(0.3, 0.5);
+    shape.lineTo(0.1, 0.5);
+    shape.lineTo(0.1, 0.3);
+    shape.lineTo(0.3, 0.3);
+    shape.lineTo(0.3, 0.8);
+    shape.lineTo(0, 0.8);
+    
+    const geometry = new THREE.ShapeGeometry(shape);
+    const material = new THREE.MeshBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.2, side: THREE.DoubleSide });
+    
+    for (let i = 0; i < particleCount; i++) {
+        const particle = new THREE.Mesh(geometry, material);
+        particle.position.x = (Math.random() - 0.5) * 15;
+        particle.position.y = (Math.random() - 0.5) * 15;
+        particle.position.z = (Math.random() - 0.5) * 5 - 3;
+        particle.rotation.z = Math.random() * Math.PI * 2;
+        particle.scale.setScalar(0.5 + Math.random() * 0.5);
+        particle.velocity = {
+            x: (Math.random() - 0.5) * 0.01,
+            y: (Math.random() - 0.5) * 0.01,
+            rz: (Math.random() - 0.5) * 0.005
+        };
+        particles.push(particle);
+        scene.add(particle);
+    }
+    
+    camera.position.z = 5;
+    
+    function animate() {
+        requestAnimationFrame(animate);
+        
+        particles.forEach(particle => {
+            particle.position.x += particle.velocity.x;
+            particle.position.y += particle.velocity.y;
+            particle.rotation.z += particle.velocity.rz;
+            
+            if (particle.position.x > 8 || particle.position.x < -8) particle.velocity.x *= -1;
+            if (particle.position.y > 8 || particle.position.y < -8) particle.velocity.y *= -1;
+        });
+        
+        renderer.render(scene, camera);
+    }
+    
+    animate();
+    
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+</script>
+}

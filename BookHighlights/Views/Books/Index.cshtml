@@ -1,0 +1,118 @@
+@model IEnumerable<BookHighlights.Models.Book>
+@{
+    ViewData["Title"] = "Meus Livros";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold">📚 Meus Livros</h1>
+    <a asp-action="Create" class="btn btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        Novo Livro
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-12">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-24 h-24 mx-auto text-base-content opacity-30">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+        </svg>
+        <p class="mt-4 text-lg text-base-content opacity-60">Nenhum livro cadastrado ainda.</p>
+        <a asp-action="Create" class="btn btn-primary mt-4">Cadastrar Primeiro Livro</a>
+    </div>
+}
+else
+{
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        @foreach (var book in Model)
+        {
+            <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
+                <div class="card-body">
+                    <h2 class="card-title text-xl">@book.Title</h2>
+                    @if (!string.IsNullOrEmpty(book.Author))
+                    {
+                        <p class="text-sm opacity-70">✍️ @book.Author</p>
+                    }
+                    <div class="card-actions justify-end mt-4">
+                        <a asp-action="Details" asp-route-id="@book.Id" class="btn btn-outline btn-sm">Ver Destaques</a>
+                        <a asp-action="Capture" asp-route-id="@book.Id" class="btn btn-primary btn-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-1">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                            </svg>
+                            Capturar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+<script>
+    // Three.js animation for book cards
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    const container = document.createElement('div');
+    container.id = 'three-bg';
+    container.className = 'fixed inset-0 -z-10 pointer-events-none';
+    document.body.appendChild(container);
+    container.appendChild(renderer.domElement);
+    
+    const particles = [];
+    const particleCount = 50;
+    
+    const geometry = new THREE.BoxGeometry(0.1, 0.15, 0.02);
+    const material = new THREE.MeshBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.3 });
+    
+    for (let i = 0; i < particleCount; i++) {
+        const particle = new THREE.Mesh(geometry, material);
+        particle.position.x = (Math.random() - 0.5) * 15;
+        particle.position.y = (Math.random() - 0.5) * 15;
+        particle.position.z = (Math.random() - 0.5) * 5 - 3;
+        particle.rotation.x = Math.random() * Math.PI;
+        particle.rotation.y = Math.random() * Math.PI;
+        particle.velocity = {
+            x: (Math.random() - 0.5) * 0.01,
+            y: (Math.random() - 0.5) * 0.01,
+            rx: (Math.random() - 0.5) * 0.01,
+            ry: (Math.random() - 0.5) * 0.01
+        };
+        particles.push(particle);
+        scene.add(particle);
+    }
+    
+    camera.position.z = 5;
+    
+    function animate() {
+        requestAnimationFrame(animate);
+        
+        particles.forEach(particle => {
+            particle.position.x += particle.velocity.x;
+            particle.position.y += particle.velocity.y;
+            particle.rotation.x += particle.velocity.rx;
+            particle.rotation.y += particle.velocity.ry;
+            
+            if (particle.position.x > 8 || particle.position.x < -8) particle.velocity.x *= -1;
+            if (particle.position.y > 8 || particle.position.y < -8) particle.velocity.y *= -1;
+        });
+        
+        renderer.render(scene, camera);
+    }
+    
+    animate();
+    
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+</script>
+}

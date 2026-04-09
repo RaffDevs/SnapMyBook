@@ -1,0 +1,244 @@
+@{
+    ViewData["Title"] = "Capturar Destaque";
+    Layout = "~/Views/Shared/_LayoutSimple.cshtml";
+    var bookId = ViewBag.BookId;
+    var bookTitle = ViewBag.BookTitle;
+}
+
+<div class="min-h-screen bg-base-200 flex flex-col">
+    <div class="navbar bg-primary text-primary-content">
+        <a asp-controller="Books" asp-action="Details" asp-route-id="@bookId" class="btn btn-ghost btn-sm">← Voltar</a>
+        <h1 class="text-xl font-bold mx-auto">@bookTitle</h1>
+        <div class="w-10"></div>
+    </div>
+
+    <main class="flex-1 p-4 flex flex-col items-center justify-center">
+        <div class="card bg-base-100 shadow-xl w-full max-w-md">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">📸 Capturar Trecho</h2>
+                
+                <!-- Camera View -->
+                <div id="camera-container" class="relative w-full aspect-[3/4] bg-black rounded-lg overflow-hidden mb-4">
+                    <video id="video" autoplay playsinline class="w-full h-full object-cover"></video>
+                    <canvas id="canvas" class="hidden"></canvas>
+                    <div id="overlay" class="absolute inset-0 border-4 border-white opacity-50 m-8 rounded"></div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex flex-col gap-3">
+                    <button id="capture-btn" class="btn btn-primary btn-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                        </svg>
+                        Capturar Foto
+                    </button>
+                    
+                    <button id="retake-btn" class="btn btn-outline hidden">
+                        🔄 Refazer Foto
+                    </button>
+                </div>
+
+                <!-- Preview and OCR Result -->
+                <div id="preview-section" class="hidden mt-4">
+                    <img id="preview-image" class="w-full rounded-lg mb-4" alt="Preview" />
+                    
+                    <div id="ocr-processing" class="hidden text-center py-4">
+                        <span class="loading loading-spinner loading-lg text-primary"></span>
+                        <p class="mt-2">Processando texto com OCR...</p>
+                    </div>
+                    
+                    <div id="ocr-result" class="hidden">
+                        <div class="form-control mb-3">
+                            <label class="label">
+                                <span class="label-text font-semibold">Texto Extraído</span>
+                            </label>
+                            <textarea id="extracted-text" class="textarea textarea-bordered w-full h-32" placeholder="O texto extraído aparecerá aqui..."></textarea>
+                        </div>
+                        
+                        <div class="form-control mb-4">
+                            <label class="label">
+                                <span class="label-text font-semibold">Número da Página</span>
+                            </label>
+                            <input type="number" id="page-number" class="input input-bordered w-full" placeholder="Ex: 42" min="1" />
+                        </div>
+                        
+                        <button id="save-btn" class="btn btn-success w-full">
+                            💾 Salvar Destaque
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Three.js Background -->
+<div id="three-container" class="fixed inset-0 -z-10"></div>
+
+@section Scripts {
+<script>
+    let stream = null;
+    let capturedImage = null;
+    
+    // Three.js animation - camera shutter effect
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById('three-container').appendChild(renderer.domElement);
+    
+    const rings = [];
+    for (let i = 0; i < 5; i++) {
+        const geometry = new THREE.TorusGeometry(1 + i * 0.3, 0.05, 8, 50);
+        const material = new THREE.MeshBasicMaterial({ color: 0x60a5fa, transparent: true, opacity: 0.3 - i * 0.05 });
+        const ring = new THREE.Mesh(geometry, material);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.z = -i * 0.5;
+        rings.push(ring);
+        scene.add(ring);
+    }
+    
+    camera.position.z = 5;
+    camera.position.y = 2;
+    camera.lookAt(0, 0, 0);
+    
+    function animate() {
+        requestAnimationFrame(animate);
+        
+        rings.forEach((ring, i) => {
+            ring.rotation.z += 0.01 * (i % 2 === 0 ? 1 : -1);
+            ring.scale.setScalar(1 + Math.sin(Date.now() * 0.001 + i) * 0.1);
+        });
+        
+        renderer.render(scene, camera);
+    }
+    
+    animate();
+    
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+    
+    // Camera setup
+    async function startCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'environment',
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                } 
+            });
+            const video = document.getElementById('video');
+            video.srcObject = stream;
+        } catch (err) {
+            console.error('Erro ao acessar câmera:', err);
+            alert('Não foi possível acessar a câmera. Verifique as permissões.');
+        }
+    }
+    
+    // Start camera on load
+    startCamera();
+    
+    // Capture button
+    document.getElementById('capture-btn').addEventListener('click', () => {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0);
+        
+        capturedImage = canvas.toDataURL('image/jpeg', 0.8);
+        
+        // Show preview
+        document.getElementById('preview-image').src = capturedImage;
+        document.getElementById('preview-section').classList.remove('hidden');
+        document.getElementById('capture-btn').classList.add('hidden');
+        document.getElementById('retake-btn').classList.remove('hidden');
+        
+        // Stop camera
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+        
+        // Perform OCR
+        performOCR(capturedImage);
+    });
+    
+    // Retake button
+    document.getElementById('retake-btn').addEventListener('click', () => {
+        document.getElementById('preview-section').classList.add('hidden');
+        document.getElementById('capture-btn').classList.remove('hidden');
+        document.getElementById('retake-btn').classList.add('hidden');
+        document.getElementById('ocr-result').classList.add('hidden');
+        
+        capturedImage = null;
+        startCamera();
+    });
+    
+    // OCR with Tesseract.js
+    async function performOCR(imageData) {
+        document.getElementById('ocr-processing').classList.remove('hidden');
+        
+        try {
+            const worker = await Tesseract.createWorker('por');
+            const result = await worker.recognize(imageData);
+            await worker.terminate();
+            
+            document.getElementById('extracted-text').value = result.data.text;
+            document.getElementById('ocr-result').classList.remove('hidden');
+        } catch (err) {
+            console.error('OCR error:', err);
+            alert('Erro ao processar texto. Tente novamente.');
+        } finally {
+            document.getElementById('ocr-processing').classList.add('hidden');
+        }
+    }
+    
+    // Save button
+    document.getElementById('save-btn').addEventListener('click', async () => {
+        const text = document.getElementById('extracted-text').value;
+        const pageNumber = document.getElementById('page-number').value || 0;
+        
+        if (!text.trim()) {
+            alert('Por favor, extraia o texto primeiro.');
+            return;
+        }
+        
+        // Convert base64 to blob
+        const response = await fetch(capturedImage);
+        const blob = await response.blob();
+        
+        // Create form data
+        const formData = new FormData();
+        formData.append('BookId', '@bookId');
+        formData.append('Text', text);
+        formData.append('PageNumber', pageNumber);
+        formData.append('Image', blob, 'capture.jpg');
+        
+        // Save to server
+        try {
+            const res = await fetch('/api/Highlights', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (res.ok) {
+                alert('✅ Destaque salvo com sucesso!');
+                window.location.href = '/Books/Details/@bookId';
+            } else {
+                throw new Error('Erro ao salvar');
+            }
+        } catch (err) {
+            console.error('Save error:', err);
+            alert('Erro ao salvar destaque. Tente novamente.');
+        }
+    });
+</script>
+}
