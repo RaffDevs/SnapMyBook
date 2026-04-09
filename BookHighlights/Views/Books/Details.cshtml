@@ -1,139 +1,215 @@
-@model BookHighlights.Models.Book
+@model BookHighlights.Application.DTOs.BookDto
+
 @{
     ViewData["Title"] = Model.Title;
-    Layout = "~/Views/Shared/_Layout.cshtml";
-    var highlights = ViewBag.Highlights as IEnumerable<BookHighlights.Models.Highlight>;
+    var highlights = ViewBag.Highlights as List<BookHighlights.Application.DTOs.HighlightDto> ?? new List<BookHighlights.Application.DTOs.HighlightDto>();
 }
 
-<div class="mb-6">
-    <a asp-action="Index" class="btn btn-ghost btn-sm mb-2">← Voltar para livros</a>
-    <h1 class="text-3xl font-bold">@Model.Title</h1>
+<div class="mb-6" x-data="{ showCaptureForm: false }">
+    <div class="flex items-center gap-4 mb-4">
+        <a asp-controller="Books" asp-action="Index" class="btn btn-ghost btn-sm">
+            ← Voltar
+        </a>
+        <h1 class="text-3xl font-bold">@Model.Title</h1>
+    </div>
+    
     @if (!string.IsNullOrEmpty(Model.Author))
     {
-        <p class="text-lg opacity-70">✍️ @Model.Author</p>
+        <p class="text-lg text-base-content/70 mb-6">✍️ @Model.Author</p>
     }
-</div>
 
-<div class="flex gap-3 mb-6">
-    <a asp-action="Capture" asp-route-id="@Model.Id" class="btn btn-primary flex-1">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-        </svg>
-        Capturar Novo Destaque
-    </a>
-</div>
-
-@if (highlights == null || !highlights.Any())
-{
-    <div class="text-center py-12 bg-base-100 rounded-lg">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-24 h-24 mx-auto text-base-content opacity-30">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-        </svg>
-        <p class="mt-4 text-lg text-base-content opacity-60">Nenhum destaque capturado ainda.</p>
-        <p class="text-sm opacity-50">Use o botão acima para capturar um trecho do livro com sua câmera.</p>
+    <!-- Action Buttons -->
+    <div class="flex gap-2 mb-6">
+        <button @@click="showCaptureForm = true" class="btn btn-primary flex-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Capturar Trecho
+        </button>
     </div>
-}
-else
-{
-    <div class="space-y-4">
-        <h2 class="text-xl font-semibold mb-4">📝 Destaques (@highlights.Count())</h2>
-        @foreach (var highlight in highlights)
-        {
-            <div class="card bg-base-100 shadow-md">
-                <div class="card-body">
-                    @if (!string.IsNullOrEmpty(highlight.ImagePath))
-                    {
-                        <figure class="mb-2">
-                            <img src="@highlight.ImagePath" alt="Trecho capturado" class="rounded-lg max-h-48 object-contain" />
-                        </figure>
-                    }
-                    <blockquote class="border-l-4 border-primary pl-4 italic my-2">
-                        <p class="text-base">@highlight.Text</p>
-                    </blockquote>
-                    <div class="flex justify-between items-center text-sm opacity-60">
-                        <span>📄 Página @highlight.PageNumber</span>
-                        <span>@highlight.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+
+    <!-- Capture Form Modal -->
+    <dialog id="capture_modal" class="modal" @@show="showCaptureForm">
+        <div class="modal-box max-w-2xl">
+            <form method="dialog">
+                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" @@click="showCaptureForm = false">✕</button>
+            </form>
+            
+            <h3 class="font-bold text-lg mb-4">📸 Capturar Trecho do Livro</h3>
+            
+            <form asp-controller="Highlights" asp-action="Create" method="post" enctype="multipart/form-data" class="space-y-4">
+                <input type="hidden" name="BookId" value="@Model.Id" />
+                
+                <!-- Camera Capture -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Foto do Trecho</span>
+                    </label>
+                    <div class="border border-base-300 rounded-lg p-4">
+                        <video id="video" class="w-full rounded-lg mb-4" autoplay playsinline style="display: none;"></video>
+                        <canvas id="canvas" class="w-full rounded-lg mb-4" style="display: none;"></canvas>
+                        <img id="photo" class="w-full rounded-lg mb-4" alt="Sua foto aparecerá aqui" style="display: none;" />
+                        
+                        <div class="flex gap-2 justify-center">
+                            <button type="button" id="startCamera" class="btn btn-primary">
+                                📷 Abrir Câmera
+                            </button>
+                            <button type="button" id="takePhoto" class="btn btn-success" style="display: none;">
+                                ✅ Capturar
+                            </button>
+                            <button type="button" id="retakePhoto" class="btn btn-warning" style="display: none;">
+                                🔄 Refazer
+                            </button>
+                        </div>
+                        
+                        <input type="file" name="image" id="imageInput" accept="image/*" capture="environment" class="file-input file-input-bordered w-full mt-4" />
+                        <label class="label">
+                            <span class="label-text-alt">Ou use a câmera acima ou selecione uma imagem da galeria</span>
+                        </label>
                     </div>
+                </div>
+                
+                <!-- Text Input (OCR Result) -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Texto do Trecho *</span>
+                    </label>
+                    <textarea name="Text" class="textarea textarea-bordered h-32" 
+                              placeholder="Digite o texto ou aguarde a extração via OCR..." required></textarea>
+                    <label class="label">
+                        <span class="label-text-alt">💡 Dica: Em breve, o texto será extraído automaticamente via OCR!</span>
+                    </label>
+                </div>
+                
+                <div class="card-actions justify-end">
+                    <button type="button" class="btn btn-ghost" @@click="showCaptureForm = false">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        💾 Salvar Destaque
+                    </button>
+                </div>
+            </form>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button @@click="showCaptureForm = false">fechar</button>
+        </form>
+    </dialog>
+
+    <!-- Highlights List -->
+    <div class="space-y-4">
+        <h2 class="text-xl font-bold mb-4">
+            Destaques (@highlights.Count)
+        </h2>
+        
+        @if (!highlights.Any())
+        {
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body items-center text-center py-12">
+                    <div class="text-5xl mb-4">📝</div>
+                    <h3 class="card-title text-lg mb-2">Nenhum destaque ainda</h3>
+                    <p class="mb-4">Capture seu primeiro trecho deste livro!</p>
+                    <button @@click="showCaptureForm = true" class="btn btn-primary">
+                        Capturar Primeiro Destaque
+                    </button>
                 </div>
             </div>
         }
+        else
+        {
+            @foreach (var highlight in highlights)
+            {
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        @if (!string.IsNullOrEmpty(highlight.ImagePath))
+                        {
+                            <figure class="mb-4">
+                                <img src="@highlight.ImagePath" alt="Trecho capturado" class="rounded-lg max-h-64 object-contain mx-auto" />
+                            </figure>
+                        }
+                        <p class="whitespace-pre-wrap">@highlight.Text</p>
+                        <div class="card-actions justify-end items-center mt-4">
+                            <span class="text-xs text-base-content/50">
+                                @highlight.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                            </span>
+                            <form asp-controller="Highlights" asp-action="Delete" asp-route-id="@highlight.Id" method="post">
+                                <input type="hidden" name="bookId" value="@Model.Id" />
+                                <button type="submit" class="btn btn-error btn-sm" onclick="return confirm('Excluir este destaque?')">
+                                    Excluir
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
     </div>
-}
+</div>
 
 @section Scripts {
-<script>
-    // Three.js animation - floating quotes
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    let container = document.getElementById('three-bg');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'three-bg';
-        container.className = 'fixed inset-0 -z-10 pointer-events-none';
-        document.body.appendChild(container);
-    }
-    container.appendChild(renderer.domElement);
-    
-    const particles = [];
-    const particleCount = 30;
-    
-    // Create quote mark shapes
-    const shape = new THREE.Shape();
-    shape.moveTo(0, 0);
-    shape.lineTo(0.3, 0);
-    shape.lineTo(0.3, 0.5);
-    shape.lineTo(0.1, 0.5);
-    shape.lineTo(0.1, 0.3);
-    shape.lineTo(0.3, 0.3);
-    shape.lineTo(0.3, 0.8);
-    shape.lineTo(0, 0.8);
-    
-    const geometry = new THREE.ShapeGeometry(shape);
-    const material = new THREE.MeshBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.2, side: THREE.DoubleSide });
-    
-    for (let i = 0; i < particleCount; i++) {
-        const particle = new THREE.Mesh(geometry, material);
-        particle.position.x = (Math.random() - 0.5) * 15;
-        particle.position.y = (Math.random() - 0.5) * 15;
-        particle.position.z = (Math.random() - 0.5) * 5 - 3;
-        particle.rotation.z = Math.random() * Math.PI * 2;
-        particle.scale.setScalar(0.5 + Math.random() * 0.5);
-        particle.velocity = {
-            x: (Math.random() - 0.5) * 0.01,
-            y: (Math.random() - 0.5) * 0.01,
-            rz: (Math.random() - 0.5) * 0.005
-        };
-        particles.push(particle);
-        scene.add(particle);
-    }
-    
-    camera.position.z = 5;
-    
-    function animate() {
-        requestAnimationFrame(animate);
+    <script>
+        // Camera functionality
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const photo = document.getElementById('photo');
+        const startCameraBtn = document.getElementById('startCamera');
+        const takePhotoBtn = document.getElementById('takePhoto');
+        const retakePhotoBtn = document.getElementById('retakePhoto');
+        const imageInput = document.getElementById('imageInput');
         
-        particles.forEach(particle => {
-            particle.position.x += particle.velocity.x;
-            particle.position.y += particle.velocity.y;
-            particle.rotation.z += particle.velocity.rz;
-            
-            if (particle.position.x > 8 || particle.position.x < -8) particle.velocity.x *= -1;
-            if (particle.position.y > 8 || particle.position.y < -8) particle.velocity.y *= -1;
+        let stream = null;
+        
+        startCameraBtn.addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' } 
+                });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                startCameraBtn.style.display = 'none';
+                takePhotoBtn.style.display = 'inline-block';
+                imageInput.style.display = 'none';
+            } catch (err) {
+                alert('Erro ao acessar câmera: ' + err.message);
+            }
         });
         
-        renderer.render(scene, camera);
-    }
-    
-    animate();
-    
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-</script>
+        takePhotoBtn.addEventListener('click', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            
+            const dataUrl = canvas.toDataURL('image/png');
+            photo.src = dataUrl;
+            photo.style.display = 'block';
+            video.style.display = 'none';
+            canvas.style.display = 'none';
+            
+            takePhotoBtn.style.display = 'none';
+            retakePhotoBtn.style.display = 'inline-block';
+            
+            // Convert to blob and set to hidden input for form submission
+            canvas.toBlob((blob) => {
+                const file = new File([blob], 'capture.png', { type: 'image/png' });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                imageInput.files = dataTransfer.files;
+            }, 'image/png');
+        });
+        
+        retakePhotoBtn.addEventListener('click', () => {
+            photo.style.display = 'none';
+            video.style.display = 'block';
+            takePhotoBtn.style.display = 'inline-block';
+            retakePhotoBtn.style.display = 'none';
+        });
+        
+        // Cleanup on modal close
+        document.addEventListener('alpine:init', () => {
+            Alpine.on('cleanup', () => {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+            });
+        });
+    </script>
 }

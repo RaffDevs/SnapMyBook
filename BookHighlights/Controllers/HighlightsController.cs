@@ -1,65 +1,63 @@
-using BookHighlights.Models;
-using BookHighlights.Data;
+using Microsoft.AspNetCore.Mvc;
+using BookHighlights.Application.Services;
+using BookHighlights.Application.DTOs;
 
 namespace BookHighlights.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class HighlightsController : ControllerBase
+public class HighlightsController : Controller
 {
-    private readonly AppDbContext _db;
-    private readonly IWebHostEnvironment _env;
+    private readonly IHighlightService _highlightService;
+    private readonly IBookService _bookService;
+    private readonly IWebHostEnvironment _environment;
 
-    public HighlightsController(AppDbContext db, IWebHostEnvironment env)
+    public HighlightsController(
+        IHighlightService highlightService, 
+        IBookService bookService,
+        IWebHostEnvironment environment)
     {
-        _db = db;
-        _env = env;
+        _highlightService = highlightService;
+        _bookService = bookService;
+        _environment = environment;
     }
 
-    [HttpGet("book/{bookId}")]
-    public IEnumerable<Highlight> GetByBook(int bookId) => _db.GetHighlightsByBookId(bookId);
-
     [HttpPost]
-    public ActionResult<Highlight> Create([FromForm] HighlightCreateDto dto)
+    public async Task<IActionResult> Create(CreateHighlightDto dto, IFormFile? image)
     {
-        var book = _db.GetBookById(dto.BookId);
-        if (book == null) return NotFound("Book not found");
+        if (!ModelState.IsValid)
+        {
+            return BadRequest();
+        }
 
         string? imagePath = null;
-        if (dto.Image != null && dto.Image.Length > 0)
-        {
-            var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads");
-            if (!Directory.Exists(uploadsFolder))
-                Directory.CreateDirectory(uploadsFolder);
 
-            var uniqueFileName = $"{Guid.NewGuid()}_{dto.Image.FileName}";
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+        if (image != null && image.Length > 0)
+        {
+            var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            var fileName = $"{Guid.NewGuid()}_{image.FileName}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
 
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
-                dto.Image.CopyTo(stream);
+                await image.CopyToAsync(stream);
             }
 
-            imagePath = $"/uploads/{uniqueFileName}";
+            imagePath = $"/uploads/{fileName}";
         }
 
-        var highlight = new Highlight
-        {
-            BookId = dto.BookId,
-            Text = dto.Text,
-            ImagePath = imagePath,
-            PageNumber = dto.PageNumber
-        };
-
-        highlight.Id = _db.AddHighlight(highlight);
-        return CreatedAtAction(nameof(GetByBook), new { bookId = highlight.BookId }, highlight);
+        var highlight = await _highlightService.CreateHighlightAsync(dto, imagePath);
+        
+        return RedirectToAction(nameof(Books.Details), "Books", new { id = dto.BookId });
     }
-}
 
-public class HighlightCreateDto
-{
-    public int BookId { get; set; }
-    public string Text { get; set; } = string.Empty;
-    public IFormFile? Image { get; set; }
-    public int PageNumber { get; set; }
+    [HttpPost("{id}")]
+    public async Task<IActionResult> Delete(int id, int bookId)
+    {
+        await _highlightService.DeleteHighlightAsync(id);
+        return RedirectToAction(nameof(Books.Details), "Books", new { id = bookId });
+    }
 }

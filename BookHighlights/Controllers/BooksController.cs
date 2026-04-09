@@ -1,34 +1,63 @@
-using BookHighlights.Models;
-using BookHighlights.Data;
+using Microsoft.AspNetCore.Mvc;
+using BookHighlights.Application.Services;
+using BookHighlights.Application.DTOs;
 
 namespace BookHighlights.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class BooksController : ControllerBase
+public class BooksController : Controller
 {
-    private readonly AppDbContext _db;
+    private readonly IBookService _bookService;
+    private readonly IHighlightService _highlightService;
 
-    public BooksController(AppDbContext db)
+    public BooksController(IBookService bookService, IHighlightService highlightService)
     {
-        _db = db;
+        _bookService = bookService;
+        _highlightService = highlightService;
     }
 
     [HttpGet]
-    public IEnumerable<Book> GetAll() => _db.GetAllBooks();
-
-    [HttpGet("{id}")]
-    public ActionResult<Book> GetById(int id)
+    public async Task<IActionResult> Index()
     {
-        var book = _db.GetBookById(id);
-        if (book == null) return NotFound();
-        return book;
+        var books = await _bookService.GetAllBooksAsync();
+        return View(books);
+    }
+
+    [HttpGet]
+    public IActionResult Create()
+    {
+        return View();
     }
 
     [HttpPost]
-    public ActionResult<Book> Create([FromBody] Book book)
+    public async Task<IActionResult> Create(CreateBookDto dto)
     {
-        book.Id = _db.AddBook(book);
-        return CreatedAtAction(nameof(GetById), new { id = book.Id }, book);
+        if (!ModelState.IsValid)
+        {
+            return View(dto);
+        }
+
+        var book = await _bookService.CreateBookAsync(dto);
+        return RedirectToAction(nameof(Details), new { id = book.Id });
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Details(int id)
+    {
+        var book = await _bookService.GetBookByIdAsync(id);
+        if (book == null)
+        {
+            return NotFound();
+        }
+
+        var highlights = await _highlightService.GetHighlightsByBookIdAsync(id);
+        ViewBag.Highlights = highlights;
+        return View(book);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await _bookService.DeleteBookAsync(id);
+        return RedirectToAction(nameof(Index));
     }
 }

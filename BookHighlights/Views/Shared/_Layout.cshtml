@@ -1,38 +1,58 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - SnapMyBook</title>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <title>@ViewData["Title"] - Book Highlights</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#570a87">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Tailwind CSS & daisyUI -->
+    <link href="/css/app.css" rel="stylesheet" />
 </head>
-<body class="bg-base-200 min-h-screen">
-    <nav class="navbar bg-primary text-primary-content shadow-lg">
+<body class="min-h-screen bg-base-200">
+    <header class="navbar bg-primary text-primary-content shadow-lg sticky top-0 z-50">
         <div class="flex-1">
-            <a class="btn btn-ghost text-xl" asp-controller="Home" asp-action="Index">📚 SnapMyBook</a>
-        </div>
-        <div class="flex-none">
-            <a class="btn btn-square btn-ghost" asp-controller="Books" asp-action="Create">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
+            <a asp-controller="Books" asp-action="Index" class="btn btn-ghost text-xl normal-case">
+                📚 Book Highlights
             </a>
         </div>
-    </nav>
+        <div class="flex-none gap-2">
+            <a asp-controller="Books" asp-action="Create" class="btn btn-success btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Novo Livro
+            </a>
+        </div>
+    </header>
 
-    <main class="container mx-auto p-4">
+    <main class="container mx-auto p-4 max-w-4xl">
         @RenderBody()
     </main>
 
     <footer class="footer footer-center p-4 bg-base-300 text-base-content mt-8">
         <aside>
-            <p>© @DateTime.Now.Year SnapMyBook - Capture seus destaques de leitura</p>
+            <p>Book Highlights - Salve seus trechos favoritos</p>
         </aside>
     </footer>
 
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Site JS -->
+    <script src="/js/site.js"></script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
