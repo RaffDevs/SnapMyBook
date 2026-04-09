@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for Book Highlights */
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Smooth transitions */
+.card {
+    transition: all 0.3s ease;
+}
+
+/* Mobile-first optimizations */
+@media (max-width: 640px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* Three.js container */
+#three-container {
+    pointer-events: none;
+}
+
+/* Camera modal optimizations */
+video, canvas {
+    max-width: 100%;
+}
+
+/* Highlight cards */
+.highlight-card {
+    @apply card bg-base-100 shadow-xl;
+}
+
+/* Print styles */
+@media print {
+    header, footer, button {
+        display: none !important;
+    }
+}
