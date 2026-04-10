@@ -1,0 +1,37 @@
+@model SnapMyBook.Web.Models.Auth.RegisterViewModel
+@{
+    ViewData["Title"] = "Criar conta";
+}
+
+<section class="auth-shell">
+    <div class="apple-card auth-card max-w-2xl">
+        <div class="apple-card-body">
+        <span class="eyebrow">Bem-vindo</span>
+        <h1>Crie sua biblioteca pessoal de trechos inesqueciveis.</h1>
+        <p class="muted">Comece com uma conta simples e transforme seu celular em um caderno vivo de leituras.</p>
+
+        <form method="post" class="stack-form">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="validation-summary apple-alert"></div>
+            <label class="field">
+                <span>Email</span>
+                <input asp-for="Email" class="apple-input" autocomplete="email" placeholder="voce@exemplo.com" />
+                <span asp-validation-for="Email" class="field-error"></span>
+            </label>
+            <label class="field">
+                <span>Senha</span>
+                <input asp-for="Password" class="apple-input" autocomplete="new-password" />
+                <span asp-validation-for="Password" class="field-error"></span>
+            </label>
+            <label class="field">
+                <span>Confirmar senha</span>
+                <input asp-for="ConfirmPassword" class="apple-input" autocomplete="new-password" />
+                <span asp-validation-for="ConfirmPassword" class="field-error"></span>
+            </label>
+            <button class="apple-btn-primary" type="submit">Criar conta</button>
+        </form>
+
+        <a class="apple-link" asp-action="Login">Ja tenho conta</a>
+        </div>
+    </div>
+</section>

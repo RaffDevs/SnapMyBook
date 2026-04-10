@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SnapMyBook.Application/SnapMyBook.Application.csproj" />
+    <Project Path="src/SnapMyBook.Domain/SnapMyBook.Domain.csproj" />
+    <Project Path="src/SnapMyBook.Infrastructure/SnapMyBook.Infrastructure.csproj" />
+    <Project Path="src/SnapMyBook.Web/SnapMyBook.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SnapMyBook.Application.Tests/SnapMyBook.Application.Tests.csproj" />
+    <Project Path="tests/SnapMyBook.Domain.Tests/SnapMyBook.Domain.Tests.csproj" />
+    <Project Path="tests/SnapMyBook.Web.Tests/SnapMyBook.Web.Tests.csproj" />
+  </Folder>
+</Solution>

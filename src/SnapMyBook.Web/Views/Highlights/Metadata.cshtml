@@ -1,0 +1,50 @@
+@model SnapMyBook.Web.Models.Highlights.HighlightReviewViewModel
+@{
+    ViewData["Title"] = "Organizar destaque";
+}
+
+<section class="screen">
+    <div class="apple-card content-card">
+        <div class="apple-card-body">
+        <div class="section-header">
+            <div>
+                <span class="eyebrow">Jornada 3 de 3</span>
+                <h1>Organize antes de salvar</h1>
+            </div>
+            <p class="muted">Adicione contexto para encontrar esse trecho com facilidade depois.</p>
+        </div>
+        <div class="journey-progress">
+            <span class="journey-progress__step is-complete badge badge-lg">Captura</span>
+            <span class="journey-progress__step is-complete badge badge-lg">Texto</span>
+            <span class="journey-progress__step is-active badge badge-lg">Organizacao</span>
+        </div>
+
+        <form asp-controller="Highlights" asp-action="Create" method="post" class="stack-form">
+            @Html.AntiForgeryToken()
+            <input asp-for="BookId" type="hidden" />
+            <input asp-for="BookTitle" type="hidden" />
+            <input asp-for="RawText" type="hidden" />
+            <input asp-for="FinalText" type="hidden" />
+            <input asp-for="Base64Image" type="hidden" />
+            <input asp-for="Confidence" type="hidden" />
+            <input asp-for="Language" type="hidden" />
+            <input asp-for="OcrFailed" type="hidden" />
+            <div class="grid-two">
+                <label class="field">
+                    <span>Capitulo</span>
+                    <input asp-for="Chapter" class="apple-input" placeholder="Ex.: Capitulo 4" />
+                </label>
+                <label class="field">
+                    <span>Pagina</span>
+                    <input asp-for="PageNumber" class="apple-input" placeholder="Opcional" />
+                </label>
+            </div>
+            <label class="field">
+                <span>Tags</span>
+                <input asp-for="Tags" class="apple-input" placeholder="filosofia, coragem, rotina" />
+            </label>
+            <button class="apple-btn-primary" type="submit">Salvar destaque</button>
+        </form>
+        </div>
+    </div>
+</section>

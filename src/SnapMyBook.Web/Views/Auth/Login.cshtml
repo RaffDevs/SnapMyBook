@@ -1,0 +1,32 @@
+@model SnapMyBook.Web.Models.Auth.LoginViewModel
+@{
+    ViewData["Title"] = "Entrar";
+}
+
+<section class="auth-shell">
+    <div class="apple-card auth-card max-w-2xl">
+        <div class="apple-card-body">
+        <span class="eyebrow">SnapMyBook</span>
+        <h1>Salve destaques do mundo fisico com a leveza de um app nativo.</h1>
+        <p class="muted">Entre para montar sua estante 3D, capturar trechos pelo celular e organizar tudo em um lugar so.</p>
+
+        <form method="post" class="stack-form">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="validation-summary apple-alert"></div>
+            <label class="field">
+                <span>Email</span>
+                <input asp-for="Email" class="apple-input" autocomplete="email" placeholder="voce@exemplo.com" />
+                <span asp-validation-for="Email" class="field-error"></span>
+            </label>
+            <label class="field">
+                <span>Senha</span>
+                <input asp-for="Password" class="apple-input" autocomplete="current-password" />
+                <span asp-validation-for="Password" class="field-error"></span>
+            </label>
+            <button class="apple-btn-primary" type="submit">Entrar</button>
+        </form>
+
+        <a class="apple-link" asp-action="Register">Criar conta</a>
+        </div>
+    </div>
+</section>

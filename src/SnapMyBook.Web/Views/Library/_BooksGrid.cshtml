@@ -1,0 +1,44 @@
+@model IReadOnlyList<BookSummaryDto>
+
+<section class="book-grid-panel glass-card">
+    <div class="section-header">
+        <div>
+            <span class="eyebrow">Fallback 2D</span>
+            <h2>Biblioteca</h2>
+        </div>
+        <p class="muted">@Model.Count livro(s)</p>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="empty-state">
+            <h3>Nenhum livro salvo ainda.</h3>
+            <p class="muted">Cadastre o primeiro livro acima e prepare uma captura pelo celular.</p>
+        </div>
+    }
+    else
+    {
+        <div class="book-grid">
+            @foreach (var book in Model)
+            {
+                <a class="book-card" asp-controller="Books" asp-action="Details" asp-route-id="@book.Id">
+                    <div class="book-cover">
+                        @if (!string.IsNullOrWhiteSpace(book.CoverUrl))
+                        {
+                            <img src="@book.CoverUrl" alt="Capa de @book.Title" />
+                        }
+                        else
+                        {
+                            <span>@book.Title.Substring(0, 1).ToUpperInvariant()</span>
+                        }
+                    </div>
+                    <div>
+                        <h3>@book.Title</h3>
+                        <p class="muted">@(string.IsNullOrWhiteSpace(book.Author) ? "Autor a definir" : book.Author)</p>
+                        <p class="micro-copy">@book.HighlightCount destaque(s)</p>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</section>

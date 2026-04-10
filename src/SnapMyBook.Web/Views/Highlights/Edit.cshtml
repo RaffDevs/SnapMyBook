@@ -1,0 +1,48 @@
+@model SnapMyBook.Web.Models.Highlights.HighlightReviewViewModel
+@{
+    ViewData["Title"] = "Editar destaque";
+}
+
+<section class="screen">
+    <div class="apple-card content-card">
+        <div class="apple-card-body">
+        <div class="section-header">
+            <div>
+                <span class="eyebrow">Ajustar destaque</span>
+                <h1>Editar texto salvo</h1>
+            </div>
+        </div>
+
+        <form method="post" class="stack-form">
+            @Html.AntiForgeryToken()
+            <input asp-for="BookId" type="hidden" />
+            <input asp-for="Language" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="validation-summary apple-alert"></div>
+            <label class="field">
+                <span>Texto final</span>
+                <textarea asp-for="FinalText" class="apple-textarea" rows="10"></textarea>
+                <span asp-validation-for="FinalText" class="field-error"></span>
+            </label>
+            <label class="field">
+                <span>Texto bruto</span>
+                <textarea asp-for="RawText" class="apple-textarea" rows="6"></textarea>
+            </label>
+            <div class="grid-two">
+                <label class="field">
+                    <span>Capitulo</span>
+                    <input asp-for="Chapter" class="apple-input" />
+                </label>
+                <label class="field">
+                    <span>Pagina</span>
+                    <input asp-for="PageNumber" class="apple-input" />
+                </label>
+            </div>
+            <label class="field">
+                <span>Tags</span>
+                <input asp-for="Tags" class="apple-input" />
+            </label>
+            <button class="apple-btn-primary" type="submit">Salvar alteracoes</button>
+        </form>
+        </div>
+    </div>
+</section>

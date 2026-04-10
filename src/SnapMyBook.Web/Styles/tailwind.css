@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+}
+
+@layer components {
+  .apple-card {
+    @apply card border border-white/60 bg-base-100/75 shadow-glass backdrop-blur-xl;
+  }
+
+  .apple-card-body {
+    @apply card-body gap-5 p-5 sm:p-6;
+  }
+
+  .apple-btn {
+    @apply btn rounded-full border-0 font-semibold normal-case;
+  }
+
+  .apple-btn-primary {
+    @apply apple-btn btn-primary shadow-lg shadow-sky/20;
+  }
+
+  .apple-btn-secondary {
+    @apply apple-btn btn-ghost bg-base-100/70 text-ink hover:bg-base-100;
+  }
+
+  .apple-btn-ghost {
+    @apply apple-btn btn-ghost bg-white/70 text-ink hover:bg-white;
+  }
+
+  .apple-input {
+    @apply input input-bordered w-full rounded-2xl border-white/60 bg-base-100/80;
+  }
+
+  .apple-textarea {
+    @apply textarea textarea-bordered w-full rounded-3xl border-white/60 bg-base-100/80;
+  }
+
+  .apple-link {
+    @apply link link-primary font-semibold no-underline hover:underline;
+  }
+
+  .apple-badge {
+    @apply badge border-0 rounded-full bg-sky/10 text-sky;
+  }
+
+  .apple-badge-soft {
+    @apply badge border-0 rounded-full bg-base-200 text-base-content/70;
+  }
+
+  .apple-alert {
+    @apply alert border border-error/20 bg-error/10 text-error rounded-3xl;
+  }
+}

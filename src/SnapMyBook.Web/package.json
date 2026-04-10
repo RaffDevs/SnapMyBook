@@ -1,0 +1,16 @@
+{
+  "name": "snapmybook-web",
+  "private": true,
+  "scripts": {
+    "dev": "tailwindcss -i ./Styles/tailwind.css -o ./wwwroot/css/tailwind.css --watch",
+    "build:css": "tailwindcss -i ./Styles/tailwind.css -o ./wwwroot/css/tailwind.css --minify"
+  },
+  "dependencies": {
+    "alpinejs": "^3.14.8",
+    "daisyui": "^4.12.22",
+    "htmx.org": "^2.0.4",
+    "tailwindcss": "^3.4.17",
+    "tesseract.js": "^5.1.1",
+    "three": "^0.179.1"
+  }
+}

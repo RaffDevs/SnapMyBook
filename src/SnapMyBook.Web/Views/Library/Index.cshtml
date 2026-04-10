@@ -1,0 +1,43 @@
+@model SnapMyBook.Web.Models.Library.LibraryIndexViewModel
+@{
+    ViewData["Title"] = "Biblioteca";
+}
+
+<section class="screen">
+    <div class="hero-card apple-card">
+        <div class="apple-card-body">
+        <div>
+            <span class="eyebrow">Sua estante viva</span>
+            <h1>Capture paginas, refine o OCR e mantenha os melhores trechos perto de voce.</h1>
+            <p class="muted">A biblioteca abaixo agora e inteiramente 3D, com livros mais proximos do objeto fisico e foco total na capa de cada obra.</p>
+        </div>
+        <div class="hero-actions">
+            <a class="apple-btn-primary" asp-controller="Books" asp-action="Create">Cadastrar livro</a>
+        </div>
+        </div>
+    </div>
+
+    <section class="apple-card search-panel">
+        <div class="apple-card-body">
+        <form class="search-form" method="get" asp-controller="Library" asp-action="Index">
+            <input class="apple-input input-search" type="search" name="search" value="@Model.Search" placeholder="Buscar por titulo ou autor" />
+        </form>
+        </div>
+    </section>
+
+    <section class="apple-card library-panel">
+        <div class="apple-card-body">
+        <div class="section-header section-header--stack">
+            <div>
+                <span class="eyebrow">Explorar</span>
+                <h2>Estante 3D</h2>
+            </div>
+            <p class="muted">Toque em um livro para entrar nele. A cena foi ajustada para apoiar os volumes na prateleira, ampliar a leitura das capas e manter um ritmo visual mais calmo.</p>
+        </div>
+        <div id="library-three"
+             class="library-three"
+             data-books='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Books.Select(x => new { id = x.Id, title = x.Title, author = x.Author, coverUrl = x.CoverUrl })))'>
+        </div>
+        </div>
+    </section>
+</section>

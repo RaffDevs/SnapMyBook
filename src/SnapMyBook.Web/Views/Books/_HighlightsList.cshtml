@@ -1,0 +1,53 @@
+@model BookDetailsDto
+
+<section class="apple-card">
+    <div class="apple-card-body">
+    <div class="section-header">
+        <div>
+            <span class="eyebrow">Arquivo</span>
+            <h2>Destaques de @Model.Title</h2>
+        </div>
+        <p class="muted">@Model.Highlights.Count resultado(s)</p>
+    </div>
+
+    @if (Model.Highlights.Count == 0)
+    {
+        <div class="empty-state alert bg-base-100/60 border-white/60">
+            <h3>Nenhum destaque ainda.</h3>
+            <p class="muted">Use a camera para capturar a primeira passagem deste livro.</p>
+        </div>
+    }
+    else
+    {
+        <div class="highlight-list">
+            @foreach (var highlight in Model.Highlights)
+            {
+                <article class="highlight-card">
+                    <div class="highlight-card__meta">
+                        <span class="apple-badge-soft">@(string.IsNullOrWhiteSpace(highlight.Chapter) ? "Sem capitulo" : highlight.Chapter)</span>
+                        <span class="apple-badge-soft">@(highlight.PageNumber.HasValue ? $"Pagina {highlight.PageNumber}" : "Pagina livre")</span>
+                        <span class="apple-badge-soft">@highlight.CapturedAtUtc.ToLocalTime().ToString("dd/MM/yyyy")</span>
+                    </div>
+                    <p>@highlight.FinalText</p>
+                    @if (highlight.Tags.Count > 0)
+                    {
+                        <div class="tag-row">
+                            @foreach (var tag in highlight.Tags)
+                            {
+                                <span class="apple-badge">@tag</span>
+                            }
+                        </div>
+                    }
+                    <div class="inline-actions">
+                        <a class="apple-link" asp-controller="Highlights" asp-action="Edit" asp-route-id="@highlight.Id" asp-route-bookId="@Model.Id">Editar</a>
+                        <form asp-controller="Highlights" asp-action="Delete" asp-route-id="@highlight.Id" asp-route-bookId="@Model.Id" method="post">
+                            @Html.AntiForgeryToken()
+                            <button class="apple-link danger-link" type="submit">Excluir</button>
+                        </form>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+    </div>
+</section>

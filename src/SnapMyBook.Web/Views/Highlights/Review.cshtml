@@ -1,0 +1,59 @@
+@model SnapMyBook.Web.Models.Highlights.HighlightReviewViewModel
+@{
+    ViewData["Title"] = "Revisar destaque";
+}
+
+<section class="screen">
+    <div class="apple-card content-card">
+        <div class="apple-card-body">
+        <div class="section-header">
+            <div>
+                <span class="eyebrow">Jornada 2 de 3</span>
+                <h1>@Model.BookTitle</h1>
+            </div>
+            <p class="muted">Ajuste o texto extraido antes de seguir para a organizacao.</p>
+        </div>
+        <div class="journey-progress">
+            <span class="journey-progress__step is-complete badge badge-lg">Captura</span>
+            <span class="journey-progress__step is-active badge badge-lg">Texto</span>
+            <span class="journey-progress__step badge badge-lg">Organizacao</span>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Base64Image) || !string.IsNullOrWhiteSpace(Model.StoredImagePath))
+        {
+            <div class="review-image">
+                <img src="@(Model.Base64Image ?? Model.StoredImagePath)" alt="Imagem do destaque" />
+            </div>
+        }
+
+        <form asp-controller="Highlights" asp-action="Metadata" method="post" class="stack-form">
+            @Html.AntiForgeryToken()
+            <input asp-for="BookId" type="hidden" />
+            <input asp-for="Step" type="hidden" />
+            <input asp-for="BookTitle" type="hidden" />
+            <input asp-for="RawText" type="hidden" />
+            <input asp-for="Base64Image" type="hidden" />
+            <input asp-for="Confidence" type="hidden" />
+            <input asp-for="Language" type="hidden" />
+            <input asp-for="OcrFailed" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="validation-summary apple-alert"></div>
+
+            <label class="field">
+                <span>Texto extraido</span>
+                <textarea asp-for="FinalText" class="apple-textarea" rows="10"></textarea>
+                <span asp-validation-for="FinalText" class="field-error"></span>
+            </label>
+            <div class="review-metadata">
+                <span class="apple-badge">Idioma: @Model.Language</span>
+                <span class="apple-badge">Confianca: @(Model.Confidence?.ToString("0.##") ?? "-")</span>
+                @if (Model.OcrFailed)
+                {
+                    <span class="badge badge-error badge-outline rounded-full">OCR com falha, revise manualmente</span>
+                }
+            </div>
+
+            <button class="apple-btn-primary" type="submit">Continuar</button>
+        </form>
+        </div>
+    </div>
+</section>

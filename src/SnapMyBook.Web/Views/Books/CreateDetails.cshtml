@@ -1,0 +1,38 @@
+@model SnapMyBook.Web.Models.Books.QuickBookCreateViewModel
+@{
+    ViewData["Title"] = "Detalhes do livro";
+}
+
+<section class="screen">
+    <div class="apple-card content-card">
+        <div class="apple-card-body">
+        <div class="flex flex-row justify-between items-center">
+            <div>
+                <span class="eyebrow">Jornada 2 de 2</span>
+                <h1>Finalize com detalhes opcionais</h1>
+            </div>
+            <a class="apple-link" asp-controller="Books" asp-action="Create">Voltar</a>
+        </div>
+        <div class="journey-progress">
+            <span class="journey-progress__step is-complete badge badge-lg">Essencial</span>
+            <span class="journey-progress__step is-active badge badge-lg">Detalhes</span>
+        </div>
+        <form asp-controller="Books" asp-action="Create" method="post" class="stack-form">
+            @Html.AntiForgeryToken()
+            <input asp-for="Title" type="hidden" />
+            <input asp-for="Author" type="hidden" />
+            <label class="field">
+                <span>ISBN</span>
+                <input asp-for="Isbn" class="apple-input" placeholder="Opcional" />
+                <span asp-validation-for="Isbn" class="field-error"></span>
+            </label>
+            <label class="field">
+                <span>URL da capa</span>
+                <input asp-for="CoverUrl" class="apple-input" placeholder="https://..." />
+                <span asp-validation-for="CoverUrl" class="field-error"></span>
+            </label>
+            <button class="apple-btn-primary" type="submit">Criar livro</button>
+        </form>
+        </div>
+    </div>
+</section>

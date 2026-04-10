@@ -1,0 +1,86 @@
+@model BookDetailsDto
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<section class="screen book-reader-screen"
+         data-book-reader
+         data-book-id="@Model.Id"
+         data-book-title="@Model.Title">
+    <div class="book-reader-shell">
+        <article class="apple-card book-reader-page book-reader-page--left">
+            <div class="apple-card-body">
+                <div class="book-reader-toolbar">
+                    <span class="eyebrow">Livro fisico</span>
+                    <a class="apple-btn-ghost js-book-close"
+                       asp-controller="Library"
+                       asp-action="Index"
+                       aria-label="Fechar livro e voltar para biblioteca">
+                        Fechar livro
+                    </a>
+                </div>
+
+                <div class="book-reader-overview">
+                    <div class="book-detail-cover">
+                        @if (!string.IsNullOrWhiteSpace(Model.CoverUrl))
+                        {
+                            <img src="@Model.CoverUrl" alt="Capa de @Model.Title" />
+                        }
+                        else
+                        {
+                            <div class="book-detail-cover__fallback">
+                                <span class="eyebrow">SnapMyBook Edition</span>
+                                <strong>@Model.Title</strong>
+                                <small>@(string.IsNullOrWhiteSpace(Model.Author) ? "Autor nao informado" : Model.Author)</small>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="book-detail-copy">
+                        <h1>@Model.Title</h1>
+                        <p class="muted">@(string.IsNullOrWhiteSpace(Model.Author) ? "Autor nao informado" : Model.Author)</p>
+                        <p class="muted">@Model.HighlightCount destaque(s) salvos neste volume.</p>
+
+                        <div class="book-reader-stats">
+                            <span class="apple-badge-soft">OCR revisado</span>
+                            <span class="apple-badge-soft">Arquivo pessoal</span>
+                        </div>
+
+                        <div class="inline-actions">
+                            <a class="apple-btn-primary" asp-controller="Highlights" asp-action="Create" asp-route-bookId="@Model.Id">Capturar novo trecho</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <div class="book-reader-shell__spine" aria-hidden="true"></div>
+
+        <section class="book-reader-page book-reader-page--right">
+            <section class="apple-card">
+                <div class="apple-card-body">
+                    <div class="section-header section-header--stack">
+                        <div>
+                            <span class="eyebrow">Dentro do livro</span>
+                            <h2>Destaques e navegacao</h2>
+                        </div>
+                        <p class="muted">Refine a busca pelos trechos salvos sem perder o contexto do livro. O painel abaixo foi pensado como a pagina oposta da leitura.</p>
+                    </div>
+
+                    <form class="filter-form"
+                          hx-get="@Url.Action("Highlights", "Books", new { id = Model.Id })"
+                          hx-target="#highlight-results"
+                          hx-trigger="input changed delay:250ms, submit">
+                        <input class="apple-input" type="search" name="query" placeholder="Buscar no texto" />
+                        <input class="apple-input" type="text" name="chapter" placeholder="Filtrar por capitulo" />
+                        <input class="apple-input" type="text" name="tag" placeholder="Filtrar por tag" />
+                    </form>
+                </div>
+            </section>
+
+            <div id="highlight-results">
+                <partial name="_HighlightsList" model="Model" />
+            </div>
+        </section>
+    </div>
+</section>

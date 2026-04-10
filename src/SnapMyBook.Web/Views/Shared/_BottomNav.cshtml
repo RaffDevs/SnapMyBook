@@ -1,0 +1,8 @@
+<nav class="bottom-nav">
+    <a class="bottom-nav__item btn btn-ghost rounded-full" asp-controller="Library" asp-action="Index">Biblioteca</a>
+    <a class="bottom-nav__item btn btn-ghost rounded-full" asp-controller="Books" asp-action="Create">Novo livro</a>
+    <form asp-controller="Auth" asp-action="Logout" method="post" class="bottom-nav__form">
+        @Html.AntiForgeryToken()
+        <button class="bottom-nav__item bottom-nav__button btn btn-ghost rounded-full" type="submit">Sair</button>
+    </form>
+</nav>

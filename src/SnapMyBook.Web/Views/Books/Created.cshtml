@@ -1,0 +1,22 @@
+@model BookDetailsDto
+@{
+    ViewData["Title"] = "Livro criado";
+}
+
+<section class="screen">
+    <div class="apple-card content-card">
+        <div class="apple-card-body">
+        <div class="section-header">
+            <div>
+                <span class="eyebrow">Livro cadastrado</span>
+                <h1>@Model.Title entrou na sua estante</h1>
+            </div>
+        </div>
+        <p class="muted">Agora faz sentido continuar a jornada e capturar o primeiro destaque desse livro.</p>
+        <div class="inline-actions">
+            <a class="apple-btn-primary" asp-controller="Highlights" asp-action="Create" asp-route-bookId="@Model.Id">Capturar primeiro trecho</a>
+            <a class="apple-btn-secondary" asp-controller="Books" asp-action="Details" asp-route-id="@Model.Id">Ver livro</a>
+        </div>
+        </div>
+    </div>
+</section>

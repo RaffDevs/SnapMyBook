@@ -1,0 +1,56 @@
+@model SnapMyBook.Web.Models.Highlights.HighlightCaptureViewModel
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    ViewData["Title"] = "Capturar destaque";
+}
+
+<section class="screen"
+         x-data="highlightCapture({
+            bookId: '@Model.BookId',
+            reviewUrl: '@Url.Action("Review", "Highlights")',
+            token: '@Antiforgery.GetAndStoreTokens(Context).RequestToken'
+         })">
+    <div class="apple-card content-card">
+        <div class="apple-card-body">
+        <div class="section-header">
+            <div>
+                <span class="eyebrow">Jornada 1 de 3</span>
+                <h1>@Model.BookTitle</h1>
+            </div>
+            <p class="muted">Enquadre o trecho, processe com OCR e revise antes de salvar.</p>
+        </div>
+        <div class="journey-progress">
+            <span class="journey-progress__step is-active badge badge-lg">Captura</span>
+            <span class="journey-progress__step badge badge-lg">Texto</span>
+            <span class="journey-progress__step badge badge-lg">Organizacao</span>
+        </div>
+
+        <div class="capture-stage">
+            <video x-ref="video" autoplay playsinline muted></video>
+            <canvas x-ref="canvas" class="hidden"></canvas>
+            <img x-show="previewImage" :src="previewImage" alt="Preview da captura" class="capture-preview" />
+        </div>
+
+        <div class="capture-actions">
+            <button class="apple-btn-secondary" type="button" x-on:click="startCamera()">Ativar camera</button>
+            <button class="apple-btn-primary" type="button" x-on:click="captureFrame()">Capturar pagina</button>
+            <label class="apple-btn-ghost">
+                Escolher foto
+                <input type="file" class="hidden" accept="image/*" capture="environment" x-on:change="loadFile($event)" />
+            </label>
+        </div>
+
+        <template x-if="ocrState === 'idle'">
+            <p class="muted">O OCR roda no cliente com tesseract.js, entao pode levar alguns segundos dependendo do dispositivo.</p>
+        </template>
+        <template x-if="ocrState === 'processing'">
+            <p class="muted">Extraindo texto da pagina...</p>
+        </template>
+        <template x-if="errorMessage">
+            <p class="field-error apple-alert" x-text="errorMessage"></p>
+        </template>
+
+        <button class="apple-btn-primary button-wide" type="button" x-bind:disabled="!previewImage || ocrState === 'processing'" x-on:click="review()">Processar OCR e revisar</button>
+        </div>
+    </div>
+</section>
