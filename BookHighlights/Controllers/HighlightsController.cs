@@ -51,13 +51,13 @@ public class HighlightsController : Controller
 
         var highlight = await _highlightService.CreateHighlightAsync(dto, imagePath);
         
-        return RedirectToAction(nameof(Books.Details), "Books", new { id = dto.BookId });
+        return RedirectToAction("Details", "Books", new { id = dto.BookId });
     }
 
     [HttpPost("{id}")]
     public async Task<IActionResult> Delete(int id, int bookId)
     {
         await _highlightService.DeleteHighlightAsync(id);
-        return RedirectToAction(nameof(Books.Details), "Books", new { id = bookId });
+        return RedirectToAction("Details", "Books", new { id = bookId });
     }
 }

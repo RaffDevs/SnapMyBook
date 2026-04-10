@@ -1,24 +1,48 @@
 ```
-# Dependencies
-node_modules/
-
 # Build artifacts
-wwwroot/css/app.css
-wwwroot/css/site.css
-wwwroot/js/site.js
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.so
+*.dylib
+*.class
 
-# Environment
-.env
-.env.local
-.env.*
+# Dependencies
+packages/
+node_modules/
+venv/
+.venv/
+__pycache__/
+*.egg-info/
 
 # Logs
 *.log
 
-# OS generated files
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
 .DS_Store
 Thumbs.db
 
-# Package manager
-package-lock.json
+# Test and coverage
+coverage/
+htmlcov/
+*.coverage
+.testcoverage
+
+# Distribution
+dist/
+build/
+target/
 ```
